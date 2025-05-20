@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>3D आयु कैलकुलेटर</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600&display=swap');
+        body {
+            background: #e0e5ec;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Baloo 2', cursive;
+            animation: bgfade 1.5s;
+        }
+        @keyframes bgfade {
+            from { filter: blur(10px); opacity: 0.1; }
+            to   { filter: blur(0); opacity: 1; }
+        }
+        .neumorph-container {
+            background: #e0e5ec;
+            border-radius: 30px;
+            box-shadow:  12px 12px 24px #b8bac0,
+                         -12px -12px 24px #ffffff;
+            padding: 40px 36px 30px 36px;
+            width: 390px;
+            max-width: 95vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: popin 1s cubic-bezier(.68,-0.55,.27,1.55);
+        }
+        @keyframes popin {
+            0%   { transform: scale(0.7) rotateX(30deg); opacity: 0; }
+            80%  { transform: scale(1.05) rotateX(-5deg); }
+            100% { transform: scale(1) rotateX(0); opacity: 1; }
+        }
+        h2 {
+            color: #2e7d32;
+            font-size: 2.2rem;
+            margin-bottom: 24px;
+            text-shadow: 1px 1px 0 #fff, 0 2px 8px #b2fefa;
+            opacity: 0;
+            animation: fadein 1.2s 0.5s forwards;
+        }
+        @keyframes fadein {
+            to { opacity: 1; }
+        }
+        .input-method-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .input-method-btn {
+            flex: 1;
+            padding: 10px 0;
+            background: #e0e5ec;
+            border: none;
+            border-radius: 12px;
+            box-shadow:  4px 4px 8px #b8bac0,
+                        -4px -4px 8px #ffffff;
+            font-size: 1.1rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #2e7d32;
+            outline: none;
+        }
+        .input-method-btn.active, .input-method-btn:hover {
+            background: #2e7d32;
+            color: #fff;
+            box-shadow:  2px 2px 6px #b8bac0,
+                        -2px -2px 6px #ffffff;
+            transform: translateY(-2px) scale(1.03);
+        }
+        .input-group label {
+            font-size: 1.1rem;
+            color: #2e7d32;
+            margin-bottom: 7px;
+            display: block;
+            opacity: 0;
+            animation: fadein 1.2s 0.8s forwards;
+        }
+        input[type="date"], input[type="number"] {
+            padding: 10px 14px;
+            font-size: 1.1rem;
+            border-radius: 12px;
+            border: none;
+            background: #e0e5ec;
+            box-shadow: inset 3px 3px 6px #b8bac0,
+                        inset -3px -3px 6px #ffffff;
+            margin-bottom: 10px;
+            outline: none;
+            width: 100%;
+            transition: box-shadow 0.2s, transform 0.2s;
+            opacity: 0;
+            animation: fadein 1.2s 1s forwards;
+        }
+        input[type="date"]:focus, input[type="number"]:focus {
+            box-shadow: 0 0 0 2px #2e7d32, 
+                        inset 3px 3px 6px #b8bac0,
+                        inset -3px -3px 6px #ffffff;
+            transform: scale(1.03);
+        }
+        .manual-inputs {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .manual-inputs input {
+            flex: 1;
+        }
+        button#calcBtn {
+            padding: 12px 0;
+            width: 100%;
+            background: #2e7d32;
+            color: #fff;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            margin-top: 16px;
+            box-shadow:  4px 4px 12px #b8bac0,
+                        -4px -4px 12px #ffffff;
+            font-family: inherit;
+            font-weight: bold;
+            transition: 0.2s, transform 0.1s;
+            outline: none;
+            opacity: 0;
+            animation: fadein 1.2s 1.2s forwards;
+        }
+        button#calcBtn:active {
+            transform: scale(0.98);
+            box-shadow:  2px 2px 6px #b8bac0,
+                        -2px -2px 6px #ffffff;
+        }
+        #result {
+            margin-top: 25px;
+            font-size: 1.25rem;
+            color: #2e7d32;
+            text-align: center;
+            min-height: 50px;
+            text-shadow: 0 2px 8px #b2fefa;
+            font-weight: bold;
+            opacity: 0;
+        }
+        #result.show {
+            animation: bounceIn 0.7s cubic-bezier(.28,.84,.42,1) forwards;
+        }
+        @keyframes bounceIn {
+            0%   { opacity: 0; transform: scale(0.7) translateY(30px);}
+            60%  { opacity: 1; transform: scale(1.1) translateY(-6px);}
+            100% { opacity: 1; transform: scale(1) translateY(0);}
+        }
+    </style>
+</head>
+<body>
+    <div class="neumorph-container">
+        <h2>आयु कैलकुलेटर</h2>
+        <div class="input-method-selector">
+            <button class="input-method-btn active" id="datePickerBtn" onclick="switchMethod('datePicker')">डेट पिकर</button>
+            <button class="input-method-btn" id="manualBtn" onclick="switchMethod('manual')">लिखें</button>
+        </div>
+        <div id="datePickerMethod" style="width:100%;">
+            <div class="input-group">
+                <label for="dob">अपनी जन्मतिथि चुनें:</label>
+                <input type="date" id="dob">
+            </div>
+        </div>
+        <div id="manualMethod" style="display: none; width:100%;">
+            <div class="input-group">
+                <label>अपनी जन्मतिथि लिखें:</label>
+                <div class="manual-inputs">
+                    <input type="number" id="day" placeholder="दिन" min="1" max="31">
+                    <input type="number" id="month" placeholder="महीना" min="1" max="12">
+                    <input type="number" id="year" placeholder="साल" min="1900" max="2025">
+                </div>
+            </div>
+        </div>
+        <button id="calcBtn" onclick="calculateAge()">आयु जानें</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let currentMethod = 'datePicker';
+        function switchMethod(method) {
+            currentMethod = method;
+            if (method === 'datePicker') {
+                document.getElementById('datePickerMethod').style.display = 'block';
+                document.getElementById('manualMethod').style.display = 'none';
+                document.getElementById('datePickerBtn').classList.add('active');
+                document.getElementById('manualBtn').classList.remove('active');
+            } else {
+                document.getElementById('datePickerMethod').style.display = 'none';
+                document.getElementById('manualMethod').style.display = 'block';
+                document.getElementById('datePickerBtn').classList.remove('active');
+                document.getElementById('manualBtn').classList.add('active');
+            }
+            // Reset result on method change
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('result').style.opacity = 0;
+        }
+        function calculateAge() {
+            let dob;
+            if (currentMethod === 'datePicker') {
+                const dobInput = document.getElementById('dob').value;
+                if (!dobInput) {
+                    showResult("कृपया अपनी जन्मतिथि चुनें।");
+                    return;
+                }
+                dob = new Date(dobInput);
+            } else {
+                const day = parseInt(document.getElementById('day').value);
+                const month = parseInt(document.getElementById('month').value) - 1;
+                const year = parseInt(document.getElementById('year').value);
+                if (isNaN(day) || isNaN(month) || isNaN(year)) {
+                    showResult("कृपया सभी फील्ड भरें।");
+                    return;
+                }
+                if (day < 1 || day > 31 || month < 0 || month > 11 || year < 1900 || year > 2025) {
+                    showResult("कृपया सही जन्मतिथि दर्ज करें।");
+                    return;
+                }
+                dob = new Date(year, month, day);
+            }
+            const today = new Date();
+            if (dob > today) {
+                showResult("जन्मतिथि आज से आगे नहीं हो सकती।");
+                return;
+            }
+            var ageYears = today.getFullYear() - dob.getFullYear();
+            var ageMonths = today.getMonth() - dob.getMonth();
+            var ageDays = today.getDate() - dob.getDate();
+            if (ageDays < 0) {
+                ageMonths--;
+                const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                ageDays += lastMonth.getDate();
+            }
+            if (ageMonths < 0) {
+                ageYears--;
+                ageMonths += 12;
+            }
+            showResult("🎉 <span style='font-size:1.3rem'>" + ageYears + " वर्ष, " + ageMonths + " माह, " + ageDays + " दिन</span>");
+        }
+        function showResult(msg) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = msg;
+            resultDiv.classList.remove('show');
+            // Force reflow for animation restart
+            void resultDiv.offsetWidth;
+            resultDiv.classList.add('show');
+        }
+    </script>
+</body>
+</html>
